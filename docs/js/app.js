@@ -1357,7 +1357,7 @@
   function init() {
     setupMarked();
 
-    fetch('data.json')
+    fetch('/data.json')
       .then(function (res) {
         if (!res.ok) throw new Error('Failed to load data.json (HTTP ' + res.status + ')');
         return res.json();
@@ -1381,7 +1381,7 @@
       .catch(function (err) {
         document.getElementById('app').innerHTML =
           '<div class="no-results"><p class="no-results-title">Failed to load drill data</p>' +
-          '<p>' + escapeHtml(err.message) + '</p><p style="margin-top:16px"><a href="data.json">Check data.json</a></p></div>';
+          '<p>' + escapeHtml(err.message) + '</p><p style="margin-top:16px"><a href="/data.json">Check data.json</a></p></div>';
       });
   }
 
