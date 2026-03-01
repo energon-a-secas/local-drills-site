@@ -1,3 +1,30 @@
+<div align="center">
+
+# Infra Drills
+
+Real-world AWS, Kubernetes, and GitLab CI/CD break-fix challenges that run entirely on your machine. Zero cloud costs, no signup.
+
+[![Live][badge-site]][url-site]
+[![Makefile][badge-make]][url-make]
+[![Shell][badge-shell]][url-shell]
+[![Claude Code][badge-claude]][url-claude]
+[![License][badge-license]](LICENSE)
+
+[badge-site]:    https://img.shields.io/badge/live_site-0063e5?style=for-the-badge&logo=googlechrome&logoColor=white
+[badge-make]:    https://img.shields.io/badge/Makefile-427819?style=for-the-badge&logo=gnu&logoColor=white
+[badge-shell]:   https://img.shields.io/badge/Shell-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white
+[badge-claude]:  https://img.shields.io/badge/Claude_Code-CC785C?style=for-the-badge&logo=anthropic&logoColor=white
+[badge-license]: https://img.shields.io/badge/license-MIT-404040?style=for-the-badge
+
+[url-site]:   https://infradrills.neorgon.com/
+[url-make]:   #
+[url-shell]:  #
+[url-claude]: https://claude.ai/code
+
+</div>
+
+---
+
 # Local Drills
 
 <p align="center">
@@ -101,4 +128,8 @@ This approach is a close second.
 
 If you encounter issues or have suggestions, feel free to open an issue or submit a pull request. Your feedback is what makes this repository grow!
 
+---
 
+<div align="center">
+  <sub>Part of <a href="https://neorgon.com">Neorgon</a></sub>
+</div>
