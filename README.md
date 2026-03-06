@@ -25,33 +25,7 @@ Real-world AWS, Kubernetes, and GitLab CI/CD break-fix challenges that run entir
 
 ---
 
-# Local Drills
-
-<p align="center">
-:bulb: Try Harder
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/energon-a-secas/local-drills/refs/heads/main/assets/localstack-logo-modified.png" alt="Banner">
-</p>
-
-
-<p align="center">
-  <a href="#overview">Overview</a> •
-  <a href="#solutions">Solutions</a> •
-  <a href="#templates">Templates</a> •
-  <a href="#contributing">Contributing</a>
-  <br/>
-  <a href="https://github.com/energon-a-secas/local-drills/tree/main/aws" target="_blank">☁️ AWS</a> •
-  <a href="https://github.com/energon-a-secas/local-drills/tree/main/gitlab" target="_blank">🚰 GitLab</a> •
-  <a href="https://github.com/energon-a-secas/local-drills/tree/main/kubernetes" target="_blank">⚙️ Kubernetes</a>
-</p>
-
----
-
-## Overview
-
-This repository offers a collection of near-real-world simulations for AWS and EKS, designed for troubleshooting and as challenges.
+Near-real-world troubleshooting simulations for AWS and EKS, built as hands-on challenges.
 
 Don't worry about cloud costs; everything you do will be executed locally using tools like LocalStack and Minikube.
 
@@ -88,7 +62,7 @@ Except to use Docker!
 - Gitlab
 - Terraform
 
-## Drills Structure
+## Drills structure
 
 Not to gatekeep, but prioritize real cases based on your own experience. Things that have made you think "Wow, I'm glad I know how to do that!" or "If someone can figure this out, I'm hiring them!
 
@@ -105,7 +79,7 @@ Not to gatekeep, but prioritize real cases based on your own experience. Things 
 
 <br>
 
-## The Curve Ball Approach
+## The curve ball approach
 
 Performing Chaos Engineering in your company each time a new member starts on-call duties or begins the onboarding isn't feasible to test their abilities or wait for something to happen to help them grow.
 
@@ -126,7 +100,7 @@ This approach is a close second.
 
 ## Contributing
 
-If you encounter issues or have suggestions, feel free to open an issue or submit a pull request. Your feedback is what makes this repository grow!
+Found a bug or have a suggestion? Open an issue or submit a pull request.
 
 ---
 
