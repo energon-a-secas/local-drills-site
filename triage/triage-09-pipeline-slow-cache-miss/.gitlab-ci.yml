@@ -1,0 +1,25 @@
+stages:
+  - install
+  - test
+
+install_deps:
+  stage: install
+  image: node:20-alpine
+  script:
+    - npm install
+    - echo "Dependencies installed"
+  cache:
+    key: $CI_PIPELINE_ID
+    paths:
+      - node_modules/
+
+run_tests:
+  stage: test
+  image: node:20-alpine
+  script:
+    - ls node_modules/.package-lock.json && echo "Cache hit" || echo "Cache miss — reinstalling"
+    - npm test
+  cache:
+    key: $CI_PIPELINE_ID
+    paths:
+      - node_modules/

@@ -25,17 +25,17 @@ Real-world AWS, Kubernetes, and GitLab CI/CD break-fix challenges that run entir
 
 ---
 
-Near-real-world troubleshooting simulations for AWS and EKS, built as hands-on challenges.
+Hands-on troubleshooting simulations for AWS, Kubernetes, and GitLab CI/CD.
 
-Don't worry about cloud costs; everything you do will be executed locally using tools like LocalStack and Minikube.
+No cloud costs — everything runs locally with LocalStack, Minikube, and gitlab-ci-local.
 
-Our three goals:
+Three goals:
 
-- 1️⃣ Give the chance to learn from others by tackling challenges you haven’t encountered yet.
-- 2️⃣ Help you understand what you don't know.
-- 3️⃣ Double as interview challenges.
+- Learn from challenges you haven’t encountered yet.
+- Discover what you don’t know.
+- Double as interview challenges.
 
-Online course labs rarely throw curveballs your way. We want to make a difference by providing interesting cases that may help you.
+Online course labs rarely throw curveballs. These cases expose the gaps that courses skip.
 
 More about this at the [Curve Ball Approach](#the-curve-ball-approach) section.
 
@@ -53,6 +53,8 @@ Except to use Docker!
     - `eks-` prefix: AWS EKS-specific (ALB ingress, IRSA, Secrets Manager CSI, etc.)
 - [GitLab CI/CD Drills](./gitlab/README.md): using [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
     - Pipelines run locally without a GitLab instance.
+- [Ticket Triage](./triage/README.md): simulated support tickets across AWS, K8s, and GitLab.
+    - Read the ticket, form a hypothesis, diagnose, find the root cause.
 
 <br>
 
@@ -64,9 +66,9 @@ Except to use Docker!
 
 ## Drills structure
 
-Not to gatekeep, but prioritize real cases based on your own experience. Things that have made you think "Wow, I'm glad I know how to do that!" or "If someone can figure this out, I'm hiring them!
+Prioritize real cases based on your own experience. Things that made you think "Wow, I'm glad I know how to do that!" or "If someone can figure this out, I'm hiring them!"
 
-- 🔎 **Problem/Request**: A thing that happened to you or a request from an user.
+- 🔎 **Problem/Request**: A thing that happened to you or a request from a user.
     - Optional Sections:
         - Context: Information that can help you understand the problem or request.
         - Hint: You may provide some clues to help the player solve the problem.
@@ -81,7 +83,7 @@ Not to gatekeep, but prioritize real cases based on your own experience. Things 
 
 ## The curve ball approach
 
-Performing Chaos Engineering in your company each time a new member starts on-call duties or begins the onboarding isn't feasible to test their abilities or wait for something to happen to help them grow.
+Running Chaos Engineering in your company each time a new member starts on-call duties is impractical, and waiting for something to break is too slow.
 
 This approach is a close second.
 

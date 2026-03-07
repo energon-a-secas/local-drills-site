@@ -1,0 +1,137 @@
+topic: First Response — AWS Incidents
+section: aws
+difficulty: intermediate
+related_drills: [lambda-01-timeout-configuration, sqs-01-message-not-consumed, apigw-01-cors-errors]
+questions:
+  - id: aws-fr-01
+    type: diagnose
+    prompt: |
+      A Lambda function returns "Task timed out after 3.00 seconds".
+      The function makes an HTTP call to an external API.
+      What do you check first?
+    options:
+      a: Check if the function has the right IAM permissions
+      b: Check the function's timeout configuration and compare it to the expected execution time
+      c: Redeploy the function from scratch
+      d: Check if the external API is down by visiting it in a browser
+    answer: b
+    explanation: >
+      The error says the timeout is 3 seconds. First, check if the configured
+      timeout matches the expected execution time. An HTTP call can exceed
+      3 seconds due to DNS, TLS, and network latency.
+
+  - id: aws-fr-02
+    type: diagnose
+    prompt: |
+      SQS messages are piling up and the Lambda consumer never fires.
+      The function was working last week. What do you check first?
+    options:
+      a: Delete the queue and recreate it
+      b: Check the event source mapping — verify it points to the correct queue ARN
+      c: Increase the queue's visibility timeout
+      d: Check the Lambda function's code for syntax errors
+    answer: b
+    explanation: >
+      If the Lambda never fires, check the event source mapping. It might
+      point to the wrong queue (e.g., the DLQ) or be disabled. Always verify
+      the mapping first.
+
+  - id: aws-fr-03
+    type: diagnose
+    prompt: |
+      An API works perfectly from curl but fails in the browser with a CORS
+      error. What do you check first?
+    options:
+      a: Check if the browser has an ad blocker
+      b: Check if the API Gateway has an OPTIONS method and if the Lambda returns CORS headers
+      c: Switch to a different browser
+      d: Add --cors to the curl command to reproduce the error
+    answer: b
+    explanation: >
+      Browsers enforce CORS; curl ignores it. The browser sends a preflight
+      OPTIONS request first. Verify API Gateway has an OPTIONS method and
+      Lambda returns Access-Control-Allow-Origin headers.
+
+  - id: aws-fr-04
+    type: diagnose
+    prompt: |
+      A user reports "Access Denied" when uploading to S3. They have
+      s3:PutObject in their IAM policy. What do you check first?
+    options:
+      a: Check if the bucket exists
+      b: Check the bucket policy for explicit Deny statements or conditions
+      c: Have the user try a different bucket
+      d: Check if S3 is experiencing an outage
+    answer: b
+    explanation: >
+      An explicit Deny in a bucket policy overrides any IAM Allow. Bucket
+      policies often add conditions like requiring encryption headers or
+      restricting IP ranges. Check the bucket policy for Deny statements and
+      their conditions.
+
+  - id: aws-fr-05
+    type: diagnose
+    prompt: |
+      A CloudFormation stack creation fails with "No export named VpcId found".
+      The networking stack that should export this value exists. What do you
+      check first?
+    options:
+      a: Check if the networking stack has an Outputs section with Export blocks
+      b: Delete both stacks and recreate them
+      c: Check if CloudFormation has permission to read the export
+      d: Rename the export to match exactly
+    answer: a
+    explanation: >
+      An Output without an Export block is visible via describe-stacks but
+      cannot be consumed by other stacks via Fn::ImportValue. Check that the
+      networking stack defines both the Output and the Export with the
+      expected name.
+
+  - id: aws-fr-06
+    type: diagnose
+    prompt: |
+      DynamoDB reads are getting throttled. The table uses provisioned
+      capacity with 5 RCUs. Reads are 4KB items using eventually consistent
+      reads. The app reads about 10 items per second. What do you check first?
+    options:
+      a: Switch to on-demand capacity mode
+      b: Calculate whether 5 RCUs can handle 10 eventually-consistent reads per second
+      c: Enable DynamoDB Accelerator (DAX)
+      d: Increase the item size to reduce the number of reads
+    answer: b
+    explanation: >
+      Each 4KB eventually-consistent read costs 0.5 RCU. 10 reads/second =
+      5 RCUs. At exactly 5 RCU provisioned, any burst above 10 reads/second
+      triggers throttling. The math should be the first check before changing
+      capacity mode or adding caching layers.
+
+  - id: aws-fr-07
+    type: diagnose
+    prompt: |
+      A Lambda function in a VPC can connect to RDS but all external API
+      calls time out. The function has a 60-second timeout. What do you
+      check first?
+    options:
+      a: Check if the security group allows outbound traffic on port 443
+      b: Check if the subnet has a NAT Gateway or VPC endpoint for internet access
+      c: Increase the timeout to 300 seconds
+      d: Check if the external API is blocking AWS IP ranges
+    answer: b
+    explanation: >
+      VPC Lambdas use ENIs in the specified subnet. If the subnet is private
+      without a NAT Gateway, there is no route to the internet. RDS works
+      because it is inside the VPC. External calls need a NAT Gateway in a
+      public subnet with proper routing.
+
+  - id: aws-fr-08
+    type: match
+    prompt: |
+      Match each AWS symptom to the most likely first diagnostic command.
+    left: ["Lambda timeout error", "S3 Access Denied", "SQS messages not consumed", "CloudFormation export not found"]
+    right: ["get-function-configuration (check timeout)", "get-bucket-policy (check deny conditions)", "list-event-source-mappings (check queue ARN)", "describe-stacks (check Outputs and Exports)"]
+    pairs: [[0,0], [1,1], [2,2], [3,3]]
+    explanation: >
+      Each symptom has a specific diagnostic entry point. Lambda timeouts:
+      check the timeout config. S3 Access Denied: check bucket policies.
+      SQS not consumed: check event source mappings. CloudFormation exports:
+      check the source stack's Outputs section.

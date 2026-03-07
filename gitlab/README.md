@@ -1,6 +1,6 @@
 # GitLab Local Pipelines
 
-To test pipelines quickly we are going to use [GitLab CI Local](https://github.com/firecow/gitlab-ci-local) tool to execute the pipelines.
+Use the [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local) tool to run pipelines locally without a GitLab instance.
 
 ## Tutorial
 

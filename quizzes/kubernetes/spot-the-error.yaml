@@ -1,0 +1,166 @@
+topic: Spot the Error — kubectl
+section: kubernetes
+difficulty: beginner
+related_drills: [k8s-01-deployment-not-starting, k8s-04-service-selector-mismatch]
+questions:
+  - id: k8s-ste-01
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl apply -f deployment.yaml -namespace production
+
+      Fails with "unknown shorthand flag: 'n' in -namespace".
+    options:
+      a: -f and -namespace cannot be used together
+      b: The namespace must exist before applying
+      c: Long flags need double dashes — use --namespace or -n
+      d: The flag should be --target-namespace
+    answer: c
+    explanation: >
+      Single-dash flags are shorthands (one letter). -namespace is parsed as
+      -n followed by leftover characters "amespace", which fails. Use
+      --namespace production or the shorthand -n production.
+
+  - id: k8s-ste-02
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl port-forward pod/my-pod 8080 80
+
+      The command runs but curl localhost:8080 returns "connection refused".
+    options:
+      a: port-forward only works with services, not pods
+      b: The ports need a colon separator — 8080:80
+      c: You must specify --address 0.0.0.0
+      d: The pod name format should omit the pod/ prefix
+    answer: b
+    explanation: >
+      Port-forward syntax is LOCAL_PORT:REMOTE_PORT with a colon. Without it,
+      kubectl treats both as separate local ports to forward, which is not the
+      intended behavior. Correct: kubectl port-forward pod/my-pod 8080:80
+
+  - id: k8s-ste-03
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl rollout restart pod/my-pod
+
+      Fails with "pod is not supported".
+    options:
+      a: The pod name must include the namespace
+      b: rollout restart works with deployments, daemonsets, statefulsets — not pods
+      c: The command should be kubectl restart pod/my-pod
+      d: You must add --force to restart a running pod
+    answer: b
+    explanation: >
+      kubectl rollout restart triggers a rolling restart by patching template
+      metadata. This only works with controllers that manage pod templates:
+      Deployment, DaemonSet, StatefulSet. To restart a single pod, delete it
+      and let its controller recreate it.
+
+  - id: k8s-ste-04
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl create secret generic db-creds --from-literal username admin
+
+      Fails with "unknown flag: admin".
+    options:
+      a: Secrets cannot be created from the command line
+      b: --from-literal needs key=value format — --from-literal=username=admin
+      c: The secret type should be opaque, not generic
+      d: --from-literal only accepts base64-encoded values
+    answer: b
+    explanation: >
+      The --from-literal flag expects key=value pairs joined by equals signs.
+      Without = between flag and value, kubectl treats "admin" as a positional
+      argument. Correct: --from-literal=username=admin
+
+  - id: k8s-ste-05
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl get pods --all-namespace
+
+      Fails with "unknown flag: --all-namespace".
+    options:
+      a: The flag is --all-namespaces (plural) or -A
+      b: You need cluster-admin permissions
+      c: The flag should be --namespace=all
+      d: get pods does not support cross-namespace queries
+    answer: a
+    explanation: >
+      The correct flag is --all-namespaces (with an 's') or shorthand -A.
+      A frequent typo that is easy to miss.
+
+  - id: k8s-ste-06
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl get pods -l app:web
+
+      Returns no results, but pods with label app=web exist.
+    options:
+      a: Label selectors use = not : — should be -l app=web
+      b: The -l flag does not work with get pods
+      c: Labels are case-sensitive — "web" should be "Web"
+      d: You must use --selector instead of -l
+    answer: a
+    explanation: >
+      Label selectors use = for equality and != for inequality. The colon
+      syntax is not valid for kubectl selectors. Correct: -l app=web.
+      For set-based selectors: -l 'app in (web,api)'.
+
+  - id: k8s-ste-07
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        kubectl exec my-pod cat /etc/config/app.conf
+
+      Fails with "unknown flag: /etc/config/app.conf".
+    options:
+      a: exec requires -it flags for any command
+      b: The command must follow a -- separator
+      c: cat is not available in most container images
+      d: You must specify the container with -c
+    answer: b
+    explanation: >
+      The -- separator tells kubectl everything after it is the command to
+      run inside the container. Without it, kubectl parses /etc/config/app.conf
+      as its own flag. Correct: kubectl exec my-pod -- cat /etc/config/app.conf
+
+  - id: k8s-ste-08
+    type: diagnose
+    prompt: |
+      Spot the error in this YAML:
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: frontend-svc
+        spec:
+          selector:
+            app: front-end
+          ports:
+            - port: 80
+              targetPort: 3000
+
+      The Service has no endpoints. Pods with label app=frontend exist.
+    options:
+      a: targetPort 3000 is out of range
+      b: The selector says "front-end" but pod labels say "frontend" — hyphen mismatch
+      c: The Service needs type: ClusterIP explicitly
+      d: port and targetPort must be the same value
+    answer: b
+    explanation: >
+      The Service selector "app: front-end" does not match the pod label
+      "app: frontend". Selectors must exactly match pod labels, including
+      hyphens, capitalization, and spelling. This is the most common cause
+      of Services with no endpoints.

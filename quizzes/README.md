@@ -81,7 +81,7 @@ Match each encryption type to its key management:
 
 ## Topic Packs
 
-### AWS (6 packs, ~50 questions)
+### AWS (8 packs, ~66 questions)
 
 | Pack | Difficulty | Questions |
 |------|-----------|-----------|
@@ -91,8 +91,10 @@ Match each encryption type to its key management:
 | `aws/vpc-networking` | intermediate | 10 |
 | `aws/sqs-patterns` | intermediate | 6 |
 | `aws/dynamodb-capacity` | advanced | 8 |
+| `aws/spot-the-error` | beginner | 8 |
+| `aws/first-response` | intermediate | 8 |
 
-### Kubernetes (5 packs, ~40 questions)
+### Kubernetes (7 packs, ~56 questions)
 
 | Pack | Difficulty | Questions |
 |------|-----------|-----------|
@@ -101,14 +103,18 @@ Match each encryption type to its key management:
 | `kubernetes/rbac-permissions` | intermediate | 6 |
 | `kubernetes/storage-concepts` | intermediate | 8 |
 | `kubernetes/deployment-strategies` | intermediate | 8 |
+| `kubernetes/spot-the-error` | beginner | 8 |
+| `kubernetes/first-response` | intermediate | 8 |
 
-### GitLab CI/CD (3 packs, ~20 questions)
+### GitLab CI/CD (5 packs, ~36 questions)
 
 | Pack | Difficulty | Questions |
 |------|-----------|-----------|
 | `gitlab/pipeline-basics` | beginner | 8 |
 | `gitlab/cache-and-artifacts` | beginner | 6 |
 | `gitlab/yaml-quoting` | intermediate | 6 |
+| `gitlab/spot-the-error` | beginner | 8 |
+| `gitlab/first-response` | intermediate | 8 |
 
 ## Adding New Questions
 

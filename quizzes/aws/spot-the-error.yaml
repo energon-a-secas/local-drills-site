@@ -1,0 +1,156 @@
+topic: Spot the Error — AWS CLI
+section: aws
+difficulty: beginner
+related_drills: [iam-01-assume-role-issue, lambda-01-timeout-configuration, s3-01-bucket-does-not-appear]
+questions:
+  - id: aws-ste-01
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal cloudformation create-stack --stack-name my-stack --template-body template.yaml
+
+      Fails with "Invalid template body". The file exists and is valid.
+    options:
+      a: --stack-name cannot contain hyphens
+      b: --template-body requires a file:// prefix (file://template.yaml)
+      c: The command should be create-change-set, not create-stack
+      d: --template-body only accepts S3 URLs
+    answer: b
+    explanation: >
+      The --template-body flag sends a string value. To read from a local file,
+      prefix the path with file:// so the CLI reads the file content. Without
+      it, the literal string "template.yaml" is sent as the template body.
+
+  - id: aws-ste-02
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal iam create-role --role-name MyRole --assume-role-policy-document trust-policy.json
+
+      Fails with "MalformedPolicyDocument". The JSON file is valid.
+    options:
+      a: --role-name must be lowercase
+      b: The flag should be --policy-document
+      c: --assume-role-policy-document requires file:// prefix
+      d: You must also pass --path /
+    answer: c
+    explanation: >
+      Like --template-body, the --assume-role-policy-document flag needs
+      file:// to read from a local file. Without it, the literal filename
+      string is sent as the policy document, which is not valid JSON.
+
+  - id: aws-ste-03
+    type: diagnose
+    prompt: |
+      Spot the error in this ARN:
+
+        awslocal sts assume-role --role-arn arn:aws:iam:000000000000:role/MyRole --role-session-name Test
+
+      Fails with "Invalid ARN".
+    options:
+      a: The service should be "sts", not "iam"
+      b: The ARN needs a double colon — iam::000000000000
+      c: --role-session-name is not a valid parameter
+      d: The role path should be /role/MyRole
+    answer: b
+    explanation: >
+      IAM ARNs use a double colon between the service and account ID because
+      the region field is empty (IAM is global). Correct format:
+      arn:aws:iam::000000000000:role/MyRole
+
+  - id: aws-ste-04
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal lambda update-function-code --function-name my-func --zip-file lambda.zip
+
+      Fails with "Could not unzip uploaded code". The zip is valid.
+    options:
+      a: The flag should be --code
+      b: --zip-file requires fileb:// prefix for binary files
+      c: You must also pass --handler and --runtime
+      d: The zip must be base64-encoded first
+    answer: b
+    explanation: >
+      The --zip-file flag requires fileb:// to read binary data from a local
+      file. file:// is for text (JSON policies), fileb:// is for binary (zips).
+      Without it, the literal string "lambda.zip" is sent as the zip content.
+
+  - id: aws-ste-05
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal ec2 describe-instances --filter Name=instance-state-name,Values=running
+
+      Fails with "Unknown options: Name=instance-state-name,Values=running".
+    options:
+      a: The flag is --filters (plural), not --filter
+      b: The syntax should use = instead of , between Name and Values
+      c: Values should be quoted as Values="running"
+      d: instance-state-name is not a valid filter
+    answer: a
+    explanation: >
+      EC2 describe-instances uses --filters (plural). Some AWS commands use
+      singular --filter while others use plural --filters. EC2 commands
+      consistently use --filters.
+
+  - id: aws-ste-06
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal sqs send-message --queue-url http://localhost:4566/000000000000/my-queue --message-body {"orderId": "123"}
+
+      The shell returns a syntax error or the message body is mangled.
+    options:
+      a: --message-body must be base64-encoded
+      b: The queue URL format is wrong for LocalStack
+      c: The JSON must be wrapped in single quotes to prevent shell expansion
+      d: --message-body only accepts plain strings, not JSON
+    answer: c
+    explanation: >
+      Without quotes, the shell interprets curly braces, colons, and spaces as
+      special characters. Wrap JSON in single quotes:
+      --message-body '{"orderId": "123"}'
+
+  - id: aws-ste-07
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal s3api put-bucket-policy --bucket my-bucket --policy policy.json
+
+      Fails with "Invalid JSON". The file policy.json is valid.
+    options:
+      a: The bucket does not exist yet
+      b: --policy requires file:// prefix (file://policy.json)
+      c: The flag should be --bucket-policy
+      d: put-bucket-policy requires --content-type
+    answer: b
+    explanation: >
+      The --policy parameter expects a JSON string. To read from a file, use
+      the file:// prefix. Same pattern as --template-body and
+      --assume-role-policy-document.
+
+  - id: aws-ste-08
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        awslocal lambda invoke --function my-func /tmp/response.json
+
+      Fails with "argument --function-name is required".
+    options:
+      a: The output file must use --output-file flag
+      b: lambda invoke requires --payload even if empty
+      c: The flag is --function-name, not --function
+      d: The output path must be in the current directory
+    answer: c
+    explanation: >
+      The correct flag is --function-name, not --function. There is no
+      shorthand --function for the invoke command. The AWS CLI requires the
+      full flag name.

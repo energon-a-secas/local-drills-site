@@ -1,0 +1,13 @@
+{
+  "name": "frontend-app",
+  "version": "1.0.0",
+  "description": "Frontend application",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0 <21.0.0"
+  },
+  "scripts": {
+    "test": "node -e \"console.log('Tests passed')\""
+  },
+  "dependencies": {}
+}

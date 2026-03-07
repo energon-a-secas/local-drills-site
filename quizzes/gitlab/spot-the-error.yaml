@@ -1,0 +1,208 @@
+topic: Spot the Error — GitLab CI/CD
+section: gitlab
+difficulty: beginner
+related_drills: [gitlab-01-cache-not-shared, gitlab-09-quotes-hell, gitlab-10-dependency-failure]
+questions:
+  - id: gl-ste-01
+    type: diagnose
+    prompt: |
+      Spot the error in this .gitlab-ci.yml:
+
+        build:
+        	stage: build
+        	script:
+        	  - npm install
+        	  - npm run build
+
+      The pipeline fails at YAML validation with "mapping values are not allowed here".
+    options:
+      a: The script commands must not have the - prefix
+      b: YAML forbids tab characters — all indentation must use spaces
+      c: The job name "build" conflicts with the stage name "build"
+      d: npm install requires a before_script block
+    answer: b
+    explanation: >
+      YAML does not allow tab characters for indentation. GitLab rejects the
+      file at parse time. Replace all tabs with spaces (usually 2 per level).
+      Most editors can be configured to insert spaces when you press Tab.
+
+  - id: gl-ste-02
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        test:
+          stage: test
+          script
+            - npm test
+
+      Fails with "jobs:test config should implement a script: or a trigger: keyword".
+    options:
+      a: The stage "test" is not defined in the stages list
+      b: script is missing a colon — should be script:
+      c: npm test must be quoted as "npm test"
+      d: The job needs an image: keyword
+    answer: b
+    explanation: >
+      Without the colon, YAML parses "script" as a plain string, not a key.
+      It merges into the previous mapping and the job has no script block.
+      Fix: add the colon — script:
+
+  - id: gl-ste-03
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        deploy:
+          stage: deploy
+          script:
+            - echo "Deploying to $DEPLOY_ENV"
+          variables:
+            DEPLOY_ENV: production
+          only: main
+
+      Fails with "jobs:deploy:only config should be an array of strings or regexes".
+    options:
+      a: Variables cannot be defined at job level
+      b: DEPLOY_ENV needs quotes around the value
+      c: only expects a list — should be only: [main] or only:\n  - main
+      d: The only keyword is inside the variables block
+    answer: c
+    explanation: >
+      The only keyword expects a list, not a scalar. Write it as
+      only: [main] or as a YAML list with - main on the next indented line.
+      The same applies to except. Note: only/except are legacy — prefer rules.
+
+  - id: gl-ste-04
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        build:
+          stage: build
+          script:
+            - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+          needs: [compile_assets]
+
+        compile-assets:
+          stage: prepare
+          script:
+            - npm run compile
+
+      Fails with "build job: need 'compile_assets' is not defined in any stage".
+    options:
+      a: The prepare stage runs after build, causing a circular dependency
+      b: needs references "compile_assets" (underscore) but the job is "compile-assets" (hyphen)
+      c: needs cannot reference jobs in earlier stages
+      d: The docker command needs to be wrapped in quotes
+    answer: b
+    explanation: >
+      The needs array references "compile_assets" with an underscore, but the
+      actual job name is "compile-assets" with a hyphen. Job names must match
+      exactly. This kind of typo is hard to spot in large pipeline files.
+
+  - id: gl-ste-05
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        test:
+          stage: test
+          script:
+            - echo "Running tests"
+          artifacts:
+            paths:
+            - build/
+            expire_in: 1 week
+
+      The pipeline runs but artifacts are never uploaded.
+    options:
+      a: expire_in is not a valid keyword
+      b: paths must be indented under artifacts (it is at the same level as artifacts)
+      c: expire_in is at the wrong indentation level — it should be under artifacts, not paths
+      d: Artifacts require the when: always flag
+    answer: c
+    explanation: >
+      The expire_in key is indented under paths instead of under artifacts.
+      YAML treats it as a second entry in the paths list. Correct indentation
+      puts expire_in at the same level as paths, both under artifacts.
+
+  - id: gl-ste-06
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        deploy:
+          stage: deploy
+          script:
+            - echo "Version is ${APP_VERSION}"
+          variables:
+            APP_VERSION: "2.0"
+          rules:
+            - if: $CI_COMMIT_TAG
+
+      The job runs but APP_VERSION is always empty in the echo output.
+    options:
+      a: Variables defined at job level are not available in script
+      b: Curly braces ${} trigger YAML interpretation — the variable is consumed by YAML, not bash
+      c: $CI_COMMIT_TAG blocks variable expansion
+      d: Variables must be defined at the top level, not inside a job
+    answer: b
+    explanation: >
+      GitLab YAML may consume ${} before bash sees it, leaving the variable
+      empty. Use $APP_VERSION (without braces) or ensure proper quoting so
+      bash handles the expansion.
+
+  - id: gl-ste-07
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        stages:
+          - build
+          - test
+
+        build_app:
+          stage: build
+          script:
+            - make build
+
+        run_tests:
+          stage: testing
+          script:
+            - make test
+
+      The run_tests job is ignored — it never appears in the pipeline.
+    options:
+      a: Job names with underscores are treated as hidden jobs
+      b: The stage "testing" does not match any defined stage — should be "test"
+      c: make test is not a valid CI command
+      d: run_tests needs a needs: [build_app] dependency
+    answer: b
+    explanation: >
+      The stages list defines "test" but the job references "testing". GitLab
+      drops jobs with undefined stages — a typo easy to overlook when "test"
+      and "testing" differ by three characters.
+
+  - id: gl-ste-08
+    type: diagnose
+    prompt: |
+      Spot the error:
+
+        lint:
+          stage: test
+          script:
+            - npm run lint
+          allow_failure: yes
+
+      The pipeline marks the lint job as blocking even though allow_failure is set.
+    options:
+      a: allow_failure only works with manual jobs
+      b: The value should be true, not yes — YAML "yes" may be interpreted differently
+      c: allow_failure must be inside a rules block
+      d: The lint job needs when: on_failure
+    answer: b
+    explanation: >
+      YAML 1.1 treats "yes" as a boolean, but GitLab's parser handles it
+      inconsistently. Always use true (unquoted) for clarity. Same applies
+      to "on", "off", and "no" — prefer true/false in GitLab CI.

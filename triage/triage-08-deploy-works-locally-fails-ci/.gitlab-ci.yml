@@ -1,0 +1,22 @@
+stages:
+  - build
+  - deploy
+
+build_app:
+  stage: build
+  image: node:20-alpine
+  script:
+    - echo '{"version":"1.0.0","env":"production"}' > settings.json
+    - echo "Build complete"
+  artifacts:
+    paths:
+      - settings.json
+
+deploy_config:
+  stage: deploy
+  image: node:20-alpine
+  script:
+    - mkdir -p /opt/app/config
+    - cp settings.json /opt/app/config/settings.json
+    - echo "Config deployed to /opt/app/config/"
+    - cat /opt/app/config/settings.json

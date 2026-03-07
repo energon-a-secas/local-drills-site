@@ -1,0 +1,138 @@
+topic: First Response — Kubernetes Incidents
+section: kubernetes
+difficulty: intermediate
+related_drills: [k8s-01-deployment-not-starting, k8s-02-resource-limits-oom, k8s-04-service-selector-mismatch]
+questions:
+  - id: k8s-fr-01
+    type: diagnose
+    prompt: |
+      A pod is in CrashLoopBackOff. You have no other context.
+      What do you run first?
+    options:
+      a: kubectl delete pod — let it restart fresh
+      b: kubectl describe pod — check events and last state
+      c: kubectl get nodes — check if the node is healthy
+      d: kubectl apply -f — redeploy the manifest
+    answer: b
+    explanation: >
+      kubectl describe pod reveals events, last termination reason, exit
+      code, and container state — whether the crash is OOMKilled, a failed
+      probe, a missing volume, or an app error. Always describe before
+      deleting.
+
+  - id: k8s-fr-02
+    type: diagnose
+    prompt: |
+      A Service returns "connection refused" for some requests. Pods are
+      Running and show 1/1 Ready. What do you check first?
+    options:
+      a: Check if the Service type should be LoadBalancer instead of ClusterIP
+      b: Check kubectl get endpoints to verify the Service has the right pod IPs and ports
+      c: Restart all pods behind the Service
+      d: Check DNS resolution of the Service name
+    answer: b
+    explanation: >
+      "Connection refused" means the connection reaches an IP but nothing
+      listens on that port. Check endpoints to verify the Service maps to
+      the correct pod IPs and ports. A selector mismatch or wrong targetPort
+      causes empty or misconfigured endpoints.
+
+  - id: k8s-fr-03
+    type: diagnose
+    prompt: |
+      After a namespace migration, an app reports "getaddrinfo ENOTFOUND
+      database-service". The database is running in another namespace.
+      What do you check first?
+    options:
+      a: Check if a NetworkPolicy is blocking DNS traffic
+      b: Check if the app uses a short hostname instead of the FQDN for cross-namespace DNS
+      c: Restart CoreDNS pods
+      d: Check if the database namespace has a DNS policy
+    answer: b
+    explanation: >
+      Short hostnames resolve within the current namespace only. After moving
+      to a different namespace, "database-service" resolves as
+      database-service.<new-namespace>.svc.cluster.local, which does not exist.
+      Use the FQDN: database-service.<target-namespace>.svc.cluster.local.
+
+  - id: k8s-fr-04
+    type: diagnose
+    prompt: |
+      A rollout undo "succeeded" but pods are still in CrashLoopBackOff.
+      What do you check first?
+    options:
+      a: Run the rollout undo again with --force
+      b: Check if the rolled-back version depends on resources (ConfigMaps, Secrets) that no longer exist
+      c: Delete the Deployment and recreate it
+      d: Scale the Deployment to 0 and back to the desired count
+    answer: b
+    explanation: >
+      Rollout undo reverts the Deployment spec (image, env, mounts) but
+      leaves deleted ConfigMaps, Secrets, and PVCs deleted. If the old version
+      used a ConfigMap that no longer exists, pods crash. Check pod events
+      for "not found" errors.
+
+  - id: k8s-fr-05
+    type: diagnose
+    prompt: |
+      An HPA shows "unknown" for CPU metrics and never scales.
+      What do you check first?
+    options:
+      a: Check if Metrics Server is installed and running
+      b: Increase the HPA maxReplicas
+      c: Add a liveness probe to the pods
+      d: Check if the cluster has enough nodes
+    answer: a
+    explanation: >
+      HPA requires Metrics Server to collect CPU and memory metrics. If
+      Metrics Server is not installed, HPA cannot read metrics and shows
+      "unknown". Also check that the Deployment has resource requests
+      defined — HPA calculates utilization as a percentage of requests.
+
+  - id: k8s-fr-06
+    type: diagnose
+    prompt: |
+      A pod is stuck in Pending for several minutes. No events appear
+      when you describe it. What do you check first?
+    options:
+      a: kubectl get nodes — check if nodes have enough resources
+      b: Delete the pod and let it be rescheduled
+      c: Check if the image is correct
+      d: Add tolerations to the pod spec
+    answer: a
+    explanation: >
+      A Pending pod with no events means the scheduler cannot find a suitable
+      node. Common causes: insufficient CPU/memory on all nodes, node taints
+      without matching tolerations, or pod affinity rules that cannot be
+      satisfied. Check node resource availability first.
+
+  - id: k8s-fr-07
+    type: diagnose
+    prompt: |
+      You see "Forbidden" errors when a pod tries to call the Kubernetes API.
+      The pod uses a custom ServiceAccount. What do you check first?
+    options:
+      a: Check if the ServiceAccount exists in the same namespace
+      b: Check if a Role and RoleBinding (or ClusterRole/ClusterRoleBinding) grant the needed permissions
+      c: Restart the kube-apiserver
+      d: Change the pod to use the default ServiceAccount
+    answer: b
+    explanation: >
+      Forbidden means the ServiceAccount lacks the required RBAC permissions.
+      Check if a Role (or ClusterRole) with the needed verbs/resources exists
+      and if a RoleBinding (or ClusterRoleBinding) binds it to the
+      ServiceAccount. No binding = no permissions.
+
+  - id: k8s-fr-08
+    type: match
+    prompt: |
+      Match each Kubernetes symptom to the first diagnostic command.
+    left: ["CrashLoopBackOff", "Service no endpoints", "Pod Pending (no events)", "ImagePullBackOff"]
+    right: ["kubectl describe pod (check events + exit code)", "kubectl get endpoints (check selector match)", "kubectl describe nodes (check resource pressure)", "kubectl describe pod (check image name + registry)"]
+    pairs: [[0,0], [1,1], [2,2], [3,3]]
+    explanation: >
+      CrashLoopBackOff: describe pod reveals exit codes and termination reason.
+      No endpoints: check if Service selector matches pod labels.
+      Pending with no events: scheduler cannot place the pod, check node
+      capacity. ImagePullBackOff: describe pod shows the exact image name
+      and registry error.

@@ -1,20 +1,20 @@
 # 🔎 Problem/Request
 
-A deployment is not responding to external requests, and the service appears to be unresponsive or inaccessible.
+A deployment stopped responding to requests. The service is unreachable.
 
-* Context: The deployment was recently updated to accommodate changes in the application's network configuration. Since the update, external connectivity issues have arisen, causing service disruptions.
-* Hint: Examine the deployment and service definitions to ensure that all network configurations align correctly.
+* Context: The deployment was recently updated to change the application's port configuration. Since the update, the service no longer accepts connections.
+* Hint: Compare the port numbers in the deployment, service, and container definitions.
 
 
 # 🧪 Validation
 
-To validate the solution, verify that the application responds correctly to network requests. Use the following command to test connectivity:
+Verify the application responds to requests:
 
 ```
 kubectl port-forward svc/my-service 8080:80
 curl localhost:8080
 ```
 
-This forwards the local port 8080 to the service port 80 and attempts a curl request. Ensure you receive a successful response from the application.
+This forwards local port 8080 to the service port 80. You should receive a successful response.
 
-💉 Solution
+💉 [Solution](../solutions/k8s-01-deployment-not-starting.md)

@@ -329,3 +329,96 @@ drills:
     prerequisites: [gitlab-00-tutorial]
     description: >
       Three-stage pipeline. Needs array has a typo in job name. Pipeline fails at YAML validation.
+
+  # ──────────────────────────────────────────────
+  # Triage (cross-section ticket simulations)
+  # ──────────────────────────────────────────────
+  - name: triage-01-api-502-gateway
+    section: triage
+    service: aws
+    difficulty: intermediate
+    tags: [lambda, handler, api-gateway, 502, incident-response]
+    status: complete
+    prerequisites: [lambda-01-timeout-configuration]
+    description: >
+      Ticket: API returns 502 Bad Gateway, "nothing changed". Lambda handler name was changed to wrong value.
+
+  - name: triage-02-app-crash-after-rollback
+    section: triage
+    service: k8s
+    difficulty: intermediate
+    tags: [rollback, configmap, crashloopbackoff, incident-response]
+    status: complete
+    prerequisites: [k8s-03-configmap-mount-failure]
+    description: >
+      Ticket: App still crashing after rollback. Rolled-back version depends on a ConfigMap that was deleted.
+
+  - name: triage-03-pipeline-broke-overnight
+    section: triage
+    service: gitlab
+    difficulty: intermediate
+    tags: [image-pinning, node-latest, engines, incident-response]
+    status: complete
+    prerequisites: [gitlab-01-cache-not-shared]
+    description: >
+      Ticket: Pipeline broke overnight with no code changes. node:latest moved to a new major version.
+
+  - name: triage-04-s3-access-denied-policy
+    section: triage
+    service: aws
+    difficulty: intermediate
+    tags: [s3, bucket-policy, encryption, deny, incident-response]
+    status: complete
+    prerequisites: [s3-01-bucket-does-not-appear]
+    description: >
+      Ticket: S3 uploads fail with Access Denied after security team updated bucket policy to require encryption.
+
+  - name: triage-05-lambda-works-locally-not-prod
+    section: triage
+    service: aws
+    difficulty: intermediate
+    tags: [lambda, vpc, nat-gateway, networking, incident-response]
+    status: complete
+    prerequisites: [lambda-10-vpc-no-internet]
+    description: >
+      Ticket: Lambda works via direct invoke but times out in production VPC. Private subnet has no NAT Gateway.
+
+  - name: triage-06-service-intermittent-503
+    section: triage
+    service: k8s
+    difficulty: intermediate
+    tags: [service, endpoints, containerPort, round-robin, incident-response]
+    status: complete
+    prerequisites: [k8s-04-service-selector-mismatch]
+    description: >
+      Ticket: Service returns 503 randomly. Two replicas but one has wrong containerPort declaration.
+
+  - name: triage-07-dns-wrong-namespace
+    section: triage
+    service: k8s
+    difficulty: intermediate
+    tags: [dns, namespace, fqdn, cross-namespace, incident-response]
+    status: complete
+    prerequisites: [k8s-01-deployment-not-starting]
+    description: >
+      Ticket: App can't connect to database after namespace migration. Short hostname doesn't resolve cross-namespace.
+
+  - name: triage-08-deploy-works-locally-fails-ci
+    section: triage
+    service: gitlab
+    difficulty: beginner
+    tags: [permissions, non-root, filesystem, works-on-my-machine, incident-response]
+    status: complete
+    prerequisites: [gitlab-00-tutorial]
+    description: >
+      Ticket: Deploy script works locally but Permission Denied in CI. Script writes to /opt/ which needs root.
+
+  - name: triage-09-pipeline-slow-cache-miss
+    section: triage
+    service: gitlab
+    difficulty: beginner
+    tags: [cache, performance, ci-pipeline-id, regression, incident-response]
+    status: complete
+    prerequisites: [gitlab-01-cache-not-shared]
+    description: >
+      Ticket: Pipeline went from 2 to 12 minutes after cleanup MR. Cache key changed to $CI_PIPELINE_ID.

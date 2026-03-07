@@ -1,0 +1,137 @@
+topic: First Response — GitLab CI/CD Incidents
+section: gitlab
+difficulty: intermediate
+related_drills: [gitlab-01-cache-not-shared, gitlab-09-quotes-hell, gitlab-10-dependency-failure]
+questions:
+  - id: gl-fr-01
+    type: diagnose
+    prompt: |
+      A pipeline broke overnight with no code changes. The error is
+      "npm ERR! engine Unsupported engine". What do you check first?
+    options:
+      a: Clear the npm cache and retry
+      b: Check if the CI image tag (e.g., node:latest) resolved to a new major version
+      c: Update package.json to remove the engines field
+      d: Switch to a different package manager
+    answer: b
+    explanation: >
+      "Unsupported engine" means the runtime version violates the engines
+      constraint in package.json. If no code changed, the image changed —
+      tags like "latest" and "lts" resolve to new versions over time. Check
+      what version the tag now resolves to.
+
+  - id: gl-fr-02
+    type: diagnose
+    prompt: |
+      A job that worked yesterday now fails with "Permission denied" when
+      writing to /opt/app/. The CI config has not changed. What do you
+      check first?
+    options:
+      a: Check if the CI runner was updated to a new version
+      b: Check if the Docker image changed and now runs as a non-root user
+      c: Add chmod 777 /opt/app to the before_script
+      d: Switch to a self-hosted runner with root access
+    answer: b
+    explanation: >
+      Some Docker images switch from root to non-root users between versions.
+      An unpinned tag may resolve to an image with a different default user.
+      Run "whoami" in the job or check the image's Dockerfile.
+
+  - id: gl-fr-03
+    type: diagnose
+    prompt: |
+      The pipeline takes 12 minutes when it used to take 2. The install
+      stage downloads all dependencies from scratch every run. What do
+      you check first?
+    options:
+      a: Switch from npm to yarn for faster installs
+      b: Check if the cache key changed to a value that is unique per run
+      c: Add more runners to parallelize the work
+      d: Upgrade to a faster machine type
+    answer: b
+    explanation: >
+      If the cache was working before and now every run downloads fresh, the
+      cache key is not matching between runs. Keys like $CI_PIPELINE_ID or
+      $CI_COMMIT_SHA are unique per run and prevent cache reuse. Check for
+      recent changes to the cache key.
+
+  - id: gl-fr-04
+    type: diagnose
+    prompt: |
+      A job references "needs: [build_app]" but fails with "need 'build_app'
+      is not defined". A job called build-app exists in the pipeline.
+      What is the most likely cause?
+    options:
+      a: The needs keyword does not work with dashes in job names
+      b: The needs reference uses an underscore but the job name uses a hyphen
+      c: build-app is in a child pipeline and cannot be referenced
+      d: The needs keyword requires the stage name, not the job name
+    answer: b
+    explanation: >
+      Job names must match exactly. "build_app" (underscore) differs from
+      "build-app" (hyphen) — an easy mistake in long pipeline files.
+
+  - id: gl-fr-05
+    type: diagnose
+    prompt: |
+      A developer's MR pipeline never runs the test job. The job has:
+      rules:
+        - if: $CI_PIPELINE_SOURCE == "push"
+      What do you check first?
+    options:
+      a: Check if the test stage is defined in the stages list
+      b: Check if MR pipelines set CI_PIPELINE_SOURCE to "merge_request_event", not "push"
+      c: Change rules to only/except syntax
+      d: Add allow_failure to the job
+    answer: b
+    explanation: >
+      MR pipelines set CI_PIPELINE_SOURCE to "merge_request_event". A rule
+      that only matches "push" excludes all MR pipelines. Add another rule
+      for merge_request_event or use a broader condition.
+
+  - id: gl-fr-06
+    type: diagnose
+    prompt: |
+      A variable set via "export MY_VAR=123" in the build job is empty
+      in the deploy job. What do you check first?
+    options:
+      a: Check if the variable name has a typo in the deploy job
+      b: Check if variables set via export are scoped to the current job only — use dotenv artifacts to pass between jobs
+      c: Define the variable in the GitLab UI instead
+      d: Use cache to share environment variables between jobs
+    answer: b
+    explanation: >
+      Each GitLab CI job runs in an isolated environment. Variables set with
+      export only exist within that job's shell. To pass variables between
+      jobs, write them to a dotenv file and declare it as an artifact using
+      artifacts:reports:dotenv.
+
+  - id: gl-fr-07
+    type: diagnose
+    prompt: |
+      A deploy job is configured with "only: production" but never runs
+      when commits are pushed to the production branch. What do you check
+      first?
+    options:
+      a: Check if "only" expects a list, not a scalar — should be "only: [production]"
+      b: Check if the branch is named "Production" with a capital P
+      c: Remove the only keyword entirely
+      d: Use when: manual instead of only
+    answer: a
+    explanation: >
+      The only keyword expects a list (array), not a scalar value. "only:
+      production" is parsed as a scalar string, not as a branch filter.
+      Correct syntax: only: [production] or a YAML list with - production.
+
+  - id: gl-fr-08
+    type: match
+    prompt: |
+      Match each GitLab CI symptom to the first thing to check.
+    left: ["Pipeline broke with no code changes", "Job skipped in MR pipelines", "Cache not reused between runs", "Variable empty in next job"]
+    right: ["Check if Docker image tag resolved to new version", "Check if rules match merge_request_event", "Check if cache key is unique per run ($CI_PIPELINE_ID)", "Check if dotenv artifacts are used to pass variables"]
+    pairs: [[0,0], [1,1], [2,2], [3,3]]
+    explanation: >
+      No code changes but failure: image tags moved. Job skipped in MRs:
+      rules only match "push", not "merge_request_event". Cache not reused:
+      cache key uses a per-run variable. Variable empty: export is job-scoped,
+      use dotenv artifacts.
