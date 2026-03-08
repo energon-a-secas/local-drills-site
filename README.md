@@ -64,6 +64,12 @@ Except to use Docker!
 - Gitlab
 - Terraform
 
+## Architecture
+
+![Architecture](docs/architecture.svg)
+
+---
+
 ## Drills structure
 
 Prioritize real cases based on your own experience. Things that made you think "Wow, I'm glad I know how to do that!" or "If someone can figure this out, I'm hiring them!"

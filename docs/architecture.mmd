@@ -1,0 +1,38 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#0f172a"
+    primaryTextColor: "#e2e8f0"
+    primaryBorderColor: "#0063e5"
+    lineColor: "#38bdf8"
+    secondaryColor: "#1e293b"
+    tertiaryColor: "#1e293b"
+    clusterBkg: "#f0f7ff"
+    clusterBorder: "#bfdbfe"
+    edgeLabelBackground: "#e8f0ff"
+    mainBkg: "#0f172a"
+    nodeBorder: "#0063e5"
+    titleColor: "#1e1b4b"
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontSize: "13px"
+---
+
+flowchart TB
+    User([User]) --> Make["make target\nMakefile entry point"]
+
+    subgraph Categories["Drill Categories"]
+        Make -->|"cd aws and make run"| AWS["aws/\nLocalStack drills\nS3, Lambda, IAM, SQS, VPC"]
+        Make -->|"cd kubernetes and make start"| K8s["kubernetes/\nMinikube drills\nk8s-* and eks-* prefixes"]
+        Make -->|"cd gitlab and make start"| GitLab["gitlab/\ngitlab-ci-local drills"]
+        Make -->|"make quiz"| Quiz["quizzes/\nYAML knowledge checks\nNo infrastructure required"]
+    end
+
+    subgraph Infrastructure["Local Infrastructure"]
+        AWS -->|"port 4566"| LocalStack["LocalStack\nAWS emulation"]
+        K8s --> Minikube["Minikube\nLocal Kubernetes"]
+        GitLab --> GCIL["gitlab-ci-local\nCI/CD without GitLab instance"]
+    end
+
+    Make -->|"make new-drill"| Scaffold["scripts/new-drill.sh\nDrill scaffolding"]
+    Make --> DrillIndex["drill-index.yaml\nCentral drill catalog"]
