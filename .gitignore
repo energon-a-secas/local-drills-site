@@ -17,3 +17,6 @@ npm-debug.log*
 
 # ── gitlab-ci-local temp data ─────────────────────────────────────────────────
 **/.gitlab-ci-local/
+
+# Claude AI guidance (maintained centrally in .claude/project-claudes/)
+CLAUDE.md
